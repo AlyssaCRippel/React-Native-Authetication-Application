@@ -1,6 +1,6 @@
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable } from 'react-native';
+import { View, Text, TextInput, Pressable, Alert } from 'react-native';
 import { createUser } from '../DataLayer/mongoconnection';
 
 //tailwind css by chat gpt
@@ -16,11 +16,31 @@ export default function SignupScreen() {
     }
 
     try {
-      const userId = await createUser(email, password);
-      console.log('User created with ID:', userId);
-  
+      const response = await createUser(email, password);
+      if (response.error) {
+        Alert.alert('Error', response.error);
+        return;
+      }
+
+      const userId = response.userId;
+      Alert.alert('Success', 'User created successfully.');
+
     } catch (error) {
-      console.error('Error creating user:', error);
+      if (
+        typeof error === 'object' &&
+        error !== null &&
+        'response' in error &&
+        typeof (error as any).response === 'object' &&
+        (error as any).response !== null &&
+        'data' in (error as any).response &&
+        typeof (error as any).response.data === 'object' &&
+        (error as any).response.data !== null &&
+        'message' in (error as any).response.data
+      ) {
+        Alert.alert('Error', (error as any).response.data.message);
+      } else {
+        Alert.alert('Error', 'An error occurred during signup.');
+      }
     }
   };
 

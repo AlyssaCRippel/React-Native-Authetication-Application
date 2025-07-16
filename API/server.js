@@ -3,6 +3,8 @@ const { MongoClient } = require('mongodb');
 const CryptoJS = require('crypto-js');
 const { v4: uuidv4 } = require('uuid');
 
+//chat got generated password validation regex and email validation regex
+
 const app = express();
 const port = 3000;
 
@@ -22,6 +24,50 @@ async function connect() {
 }
 
 app.use(express.json());
+
+const validatePassword = (password) => {
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[@$!%*?&]/.test(password);
+    const isLongEnough = password.length >= 8;
+
+    if (!hasUpperCase) {
+        return { valid: false, message: 'Password must include at least one uppercase letter.' };
+    }
+    if (!hasLowerCase) {
+        return { valid: false, message: 'Password must include at least one lowercase letter.' };
+    }
+    if (!hasNumber) {
+        return { valid: false, message: 'Password must include at least one number.' };
+    }
+    if (!hasSpecialChar) {
+        return { valid: false, message: 'Password must include at least one special character.' };
+    }
+    if (!isLongEnough) {
+        return { valid: false, message: 'Password must be at least 8 characters long.' };
+    }
+
+    return { valid: true };
+};
+
+const validateEmail = (email) => {
+    const hasAtSymbol = /@/.test(email);
+    const hasDomain = /\.[a-z]{2,}$/.test(email);
+    const noSpaces = !/\s/.test(email);
+
+    if (!hasAtSymbol) {
+        return { valid: false, message: 'Email must include an @ symbol.' };
+    }
+    if (!hasDomain) {
+        return { valid: false, message: 'Email must include a valid domain (e.g., .com, .org).' };
+    }
+    if (!noSpaces) {
+        return { valid: false, message: 'Email must not contain spaces.' };
+    }
+
+    return { valid: true };
+};
 
 /*
 * Login Endpoint to authenticate a user
@@ -85,6 +131,11 @@ app.put('/users/:id/password', async (req, res) => {
     const collection = await connect();
 
     console.log('Received user ID:', id); // Log the ID for debugging
+
+    const passwordValidation = validatePassword(newPassword);
+    if (!passwordValidation.valid) {
+        return res.status(400).json({ message: passwordValidation.message });
+    }
 
     const salt = CryptoJS.lib.WordArray.random(16).toString();
     const hashPassword = (password) =>

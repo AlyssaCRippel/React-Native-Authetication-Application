@@ -31,8 +31,19 @@ export default function UpdateScreen({ navigation }: any) {
             setPassword('');
             setConfirmPassword('');
         } catch (error) {
-            console.error(error);
-            Alert.alert('Error', 'An error occurred while updating the password.');
+            if (
+                error instanceof Object &&
+                'response' in error &&
+                error.response instanceof Object &&
+                'data' in error.response &&
+                error.response.data instanceof Object &&
+                'message' in error.response.data &&
+                typeof error.response.data.message === 'string'
+            ) {
+                Alert.alert('Error', error.response.data.message);
+            } else {
+                Alert.alert('Error', 'An error occurred while updating the password.');
+            }
         }
     };
 

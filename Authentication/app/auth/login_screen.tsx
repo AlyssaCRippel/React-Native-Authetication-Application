@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Pressable } from 'react-native';
+import { View, Text, TextInput, Pressable, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { verifyInstallation } from 'nativewind';
 import { login } from '../DataLayer/mongoconnection';
@@ -12,24 +12,42 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email || !password) {
-      console.log('Error: Please fill in all fields.');
+      Alert.alert('Error', 'Please fill in all fields.');
       return;
     }
 
     try {
-      const user = await login(email, password);
+      const response = await login(email, password);
+      if (response.error) {
+        Alert.alert('Error', response.error);
+        return;
+      }
+
+      const user = response.user;
       if (user) {
-        console.log('Login successful:', user);
-        const userId = user.user._id; 
-        console.log('Extracted User ID:', userId);
-        router.setParams({ user: userId }); 
-        router.push({ pathname: `/auth/update_screen`, params: { user: userId } }); 
+        const userId = user._id;
+        router.setParams({ user: userId });
+        router.push({ pathname: `/auth/update_screen`, params: { user: userId } });
       } else {
-        console.log('Error: Invalid email or password.');
+        Alert.alert('Error', 'Invalid email or password.');
       }
     } catch (error) {
-      console.error('Error during login:', error);
-    }
+        if (
+          typeof error === 'object' &&
+          error !== null &&
+          'response' in error &&
+          typeof (error as any).response === 'object' &&
+          (error as any).response !== null &&
+          'data' in (error as any).response &&
+          typeof (error as any).response.data === 'object' &&
+          (error as any).response.data !== null &&
+          'message' in (error as any).response.data
+        ) {
+          Alert.alert('Error', (error as any).response.data.message);
+        } else {
+          Alert.alert('Error', 'An error occurred during login.');
+        }
+      }
   };
   return (
     <View className="flex-1 justify-center px-5 bg-white">
