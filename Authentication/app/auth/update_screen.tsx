@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useSearchParams } from 'expo-router/build/hooks';
 
 //tailwind by chat gpt
+//generated error fix for user alerts 
 export default function UpdateScreen({ navigation }: any) {
     const userId = useSearchParams().get('user');
     const [password, setPassword] = useState('');

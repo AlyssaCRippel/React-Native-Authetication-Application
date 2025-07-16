@@ -5,6 +5,7 @@ import { verifyInstallation } from 'nativewind';
 import { login } from '../DataLayer/mongoconnection';
 
 //tailwind css by chat gpt
+//generated error fix for user alerts 
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');

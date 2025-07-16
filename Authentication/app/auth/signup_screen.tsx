@@ -4,6 +4,7 @@ import { View, Text, TextInput, Pressable, Alert } from 'react-native';
 import { createUser } from '../DataLayer/mongoconnection';
 
 //tailwind css by chat gpt
+//generated error fix for user alerts 
 export default function SignupScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');

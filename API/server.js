@@ -4,6 +4,7 @@ const CryptoJS = require('crypto-js');
 const { v4: uuidv4 } = require('uuid');
 
 //chat got generated password validation regex and email validation regex
+//also generated some hashing logic for password hashing and salting
 
 const app = express();
 const port = 3000;
